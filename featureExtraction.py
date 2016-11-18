@@ -11,6 +11,10 @@ import featuresDOF
 import scipy.cluster.hierarchy as hier
 import scipy.spatial.distance as dist
 from matplotlib import pyplot as plt
+import sklearn.svm
+import sklearn.decomposition
+import sklearn.ensemble
+
 
 def resizeFrame(frame, targetWidth):
     (Width, Height) = frame.shape[1], frame.shape[0]
@@ -137,20 +141,24 @@ def getFeaturesFromDirs(dirNames):
                 classNames.append(d.split(os.sep)[-1])
 
     return features, classNames, fileNames, featureNames
-
-
-
     #return (Features, imageFilesList, Names)
 
+def pcaDimRed(features, nDims):        
+    pca = sklearn.decomposition.PCA(n_components = nDims)    
+    pca.fit(features)
+    coeff = pca.components_          
+    featuresNew = []
+    for f in features:
+        ft = f.copy()                        
+        ft = numpy.squeeze(numpy.asarray(numpy.dot(f, coeff.T)))        
+        featuresNew.append(ft)
+    print numpy.array(featuresNew).shape
+    return (featuresNew, coeff)
 
-def visualizeFeatures(Features, Files, Names):
-    pca = mlpy.PCA(method='cov') # pca (eigenvalue decomposition)
-    pca.learn(Features)
-    coeff = pca.coeff()
-    y_eig = pca.transform(Features, k=2)
-
+def visualizeFeatures(Features, Files, Names):    
+    y_eig, coeff = pcaDimRed(Features, 2)    
     plt.close("all")
-
+    print y_eig
     plt.subplot(2,1,1);
     ax = plt.gca()
     for i in range(len(Files)):
@@ -160,8 +168,7 @@ def visualizeFeatures(Features, Files, Names):
         myaximage = ax.imshow(cv2.cvtColor(im, cv2.cv.CV_RGB2BGR), extent=(startX-Width/2.0, startX+Width/2.0, startY-Height/2.0, startY+Height/2.0), alpha=1.0, zorder=-1)
         plt.axis((-3,3,-3,3))
     # Plot feaures
-    plt.subplot(2,1,2)
-    print Features.shape
+    plt.subplot(2,1,2)    
     ax = plt.gca()
     for i in range(len(Files)):            
         plt.plot(numpy.array(Features[i,:].T));

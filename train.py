@@ -9,8 +9,7 @@ from sklearn.neural_network import BernoulliRBM
 from sklearn.pipeline import Pipeline
 #from nolearn.dbn import DBN
 from scipy import linalg as la
-from sklearn.lda import LDA
-import textSentimentAnalysis as text
+#from sklearn.lda import LDA
 import random
 RBM_NCOMPONENTS = 120;
 import sklearn.svm
@@ -34,69 +33,6 @@ class kNN:
         return (numpy.argmax(P), P)
 
 
-def lda(data,labels,redDim):
-    # Centre data
-    data -= data.mean(axis=0)
-    nData = numpy.shape(data)[0]
-    nDim = numpy.shape(data)[1]
-    print nData, nDim
-    Sw = numpy.zeros((nDim,nDim))
-    Sb = numpy.zeros((nDim,nDim))
-    
-    C = numpy.cov((data.T))
-
-    # Loop over classes    
-    classes = numpy.unique(labels)
-    for i in range(len(classes)):
-        # Find relevant datapoints
-        indices = (numpy.where(labels==classes[i]))
-        d = numpy.squeeze(data[indices,:])
-        classcov = numpy.cov((d.T))
-        Sw += float(numpy.shape(indices)[0])/nData * classcov
-        
-    Sb = C - Sw
-    # Now solve for W
-    # Compute eigenvalues, eigenvectors and sort into order
-    #evals,evecs = linalg.eig(dot(linalg.pinv(Sw),sqrt(Sb)))
-    evals,evecs = la.eig(Sw,Sb)
-    indices = numpy.argsort(evals)
-    indices = indices[::-1]
-    evecs = evecs[:,indices]
-    evals = evals[indices]
-    w = evecs[:,:redDim]
-    #print evals, w
-
-    newData = numpy.dot(data,w)
-    #for i in range(newData.shape[0]):
-    #    plt.text(newData[i,0],newData[i,1],str(labels[i]))
-
-    #plt.xlim([newData[:,0].min(), newData[:,0].max()])
-    #plt.ylim([newData[:,1].min(), newData[:,1].max()])
-    #plt.show()
-    return newData,w
-
-
-def dimRed_LDA_save(fileToSave, features, N):
-
-
-
-    [X, Y] = listOfFeatures2Matrix(features)
-    clf = LDA(n_components=5)
-    clf.fit(X, Y)    
-    X2 = (clf.transform(X))
-
-    plt.plot(X2[:,0],'*')
-    plt.plot(X2[:,1],'*r')
-    plt.show()
-    fo = open(fileToSave, "wb")
-    cPickle.dump(w,  fo, protocol = cPickle.HIGHEST_PROTOCOL)
-    fo.close()
-
-def dimRed_LDA_load(fileToLoad):
-    fo = open(fileToLoad, "rb")
-    w     = cPickle.load(fo)
-    fo.close()
-    return w
 
 def classifierWrapper(classifier, classifierType, testSample):
     '''
@@ -468,7 +404,7 @@ def loadDBNModel(dbnModelName):
 
     return(Classifier, classNames, MAX, MIN);
 
-def evaluateClassifier(features, fileNames, ClassNames, nExp, ClassifierName, Params, parameterMode, method, dimRedFile = ""):
+def evaluateClassifier(features, fileNames, ClassNames, nExp, ClassifierName, Params, parameterMode, method):
     '''
     ARGUMENTS:
         features:     a list ([numOfClasses x 1]) whose elements containt numpy matrices of features.
@@ -488,14 +424,6 @@ def evaluateClassifier(features, fileNames, ClassNames, nExp, ClassifierName, Pa
         for f in c:
             t.append(text.classifyFile(1, "NBmodelSmall", f))
         textSents.append(numpy.array(t))
-
-    if len(dimRedFile)>0:
-        w = dimRed_LDA_load(dimRedFile)
-        plt.plot(w)
-        plt.show()
-        for i in range(len(features)):
-            features[i] = features[i] * w
-            print features[i].shape
 
     # feature normalization:
     (featuresNorm, MAX, MIN) = normalizeFeatures(features)
@@ -769,8 +697,7 @@ def fileClassification(inputFile, modelName, modelType):
     [curFV, _] = featureExtraction.getFeaturesFromFile(inputFile, False)    
 
     if modelType=='svm' or modelType=='knn' or modelType=="rbm" or modelType=="svm+knn":
-        curFV = (curFV - MIN) / (MAX-MIN+0.00000001);            # normalization
-    print curFV
+        curFV = (curFV - MIN) / (MAX-MIN+0.00000001);            # normalization    
     if modelType!='svm+knn':
         [Result, P] = classifierWrapper(Classifier, modelType, curFV)    # classification
     else:
@@ -855,20 +782,6 @@ def main(argv):
             #(features, classNames, fileNames) = featureExtraction.getFeaturesFromDirs(dirNames)
             featureAndTrain(dirNames, modelType, modelName)
 
-    if argv[1] == "-dimRedFromFile":
-        if len(argv)>=4:
-            featureFile = argv[2]
-            dimRedFile = argv[3]
-
-            fo = open(featureFile, "rb")
-            features     = cPickle.load(fo)
-            classNames     = cPickle.load(fo)
-            fileNames  = cPickle.load(fo)
-            featureNames   = cPickle.load(fo)
-            fo.close()
-
-            dimRed_LDA_save(dimRedFile, features, 3)
-
 
     if argv[1] == "-evaluateClassifierFromFile":         # evaluate a classifier for features stored in file
         # to be used after featureExtraction's getFeaturesFromDirs functionality. Eg:
@@ -917,7 +830,7 @@ def main(argv):
             else:
                 modelName = argv[3]
                 fileToClassify = argv[4]        
-            [P, C] = fileClassification(fileToClassify, modelName, modelType)
+            [P, C] = fileClassification(fileToClassify, modelName, modelType)            
             for c, p in zip(C,P):                
                 print "{0:20s} \t {1:15.1f}%".format(c,100*p);
 
