@@ -404,7 +404,7 @@ def loadDBNModel(dbnModelName):
 
     return(Classifier, classNames, MAX, MIN);
 
-def evaluateClassifier(features, fileNames, ClassNames, nExp, ClassifierName, Params, parameterMode, method):
+def evaluateClassifier(features, fileNames, ClassNames, nExp, ClassifierName, Params, parameterMode, method, dimReduction = ""):
     '''
     ARGUMENTS:
         features:     a list ([numOfClasses x 1]) whose elements containt numpy matrices of features.
