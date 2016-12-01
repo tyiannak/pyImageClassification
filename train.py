@@ -471,30 +471,6 @@ def evaluateClassifier(features, fileNames, ClassNames, nExp, ClassifierName, Pa
                                 Results[ss] = numpy.argmax(numpy.array(P))
                             else:
                                 [Results[ss], P] = classifierWrapper(Classifier, ClassifierName, featuresTest[c1][ss])
-
-                            # textual + visual fusion:
-                            if method!=0:
-                                if sentPTest[c1][ss] < 0.52 and sentPTest[c1][ss] > 0.48:        # exclude border-line text decisions
-                                    sentPTest[c1][ss] = random.random()
-                                                            
-                            if method==0:
-                                if ClassifierName=="svm" or ClassifierName=="svm+knn":
-                                    P = P[0]                    # visual only
-                                else:
-                                    if Results[ss] == 0:
-                                        P = 1
-                                    else:
-                                        P = 0
-                            elif method==1:
-                                P = sentPTest[c1][ss]                # text
-                            else:
-                                P = (1.4*P[0]+0.6*sentPTest[c1][ss])/2.0    # fusion
-
-
-                            if P>=0.5:
-                                Results[ss] = 0;
-                            else:
-                                Results[ss] = 1;
                         for c2 in range(nClasses):
                             CMt[c1][c2] = float(len(numpy.nonzero(Results==c2)[0]))
                     CM = CM + CMt

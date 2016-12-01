@@ -28,12 +28,12 @@ def resizeFrame(frame, targetWidth):
 
     return frameFinal
 
-def blockshaped(arr, nrows, ncols):
+def blockshaped(arr):
     blocks = []    
-    blocks.append(arr[0:arr.shape[0]/2,0:arr.shape[1]/2])
-    blocks.append(arr[0:arr.shape[0]/2,arr.shape[1]/2:-1])
-    blocks.append(arr[arr.shape[0]/2:-1,0:arr.shape[1]/2])
-    blocks.append(arr[arr.shape[0]/2:-1,arr.shape[1]/2:-1])
+    blocks.append(arr[0:arr.shape[0],0:arr.shape[1]/2])
+    blocks.append(arr[0:arr.shape[0],arr.shape[1]/2:-1])
+    #blocks.append(arr[arr.shape[0]/2:-1,0:arr.shape[1]/2])
+    #blocks.append(arr[arr.shape[0]/2:-1,arr.shape[1]/2:-1])
     return blocks
 
 def featureExtraction(img, PLOT = False):
@@ -47,41 +47,43 @@ def featureExtraction(img, PLOT = False):
     #[fHOG, namesHOG] = featuresHOG.getHOG(img);            t5 = time.clock();    #print "{0:.2f} seconds used in HOG".format(t6-t5)
     #[fDOF, namesDOF] = featuresDOF.getDepthOfFieldFeature2(img);     t6 = time.clock();
     
-    blocks = blockshaped(img, img.shape[0]/2, img.shape[1]/2)    
+    blocks = blockshaped(img)    
     [fLines1, namesLines] = featuresLines.getLineFeatures(blocks[0]); 
     [fLines2, namesLines] = featuresLines.getLineFeatures(blocks[1]); 
-    [fLines3, namesLines] = featuresLines.getLineFeatures(blocks[2]); 
-    [fLines4, namesLines] = featuresLines.getLineFeatures(blocks[3]); 
+    #[fLines3, namesLines] = featuresLines.getLineFeatures(blocks[2]); 
+    #[fLines4, namesLines] = featuresLines.getLineFeatures(blocks[3]); 
     t1 = time.clock();    #print "{0:.2f} seconds used in line detection".format(t1-start)    
-    [fFaces1, namesFaces] = featuresFace.getFeaturesFace(blocks[0]);    
-    [fFaces2, namesFaces] = featuresFace.getFeaturesFace(blocks[1]);    
-    [fFaces3, namesFaces] = featuresFace.getFeaturesFace(blocks[2]);    
-    [fFaces4, namesFaces] = featuresFace.getFeaturesFace(blocks[3]);        
+    #[fFaces1, namesFaces] = featuresFace.getFeaturesFace(blocks[0]);    
+    #[fFaces2, namesFaces] = featuresFace.getFeaturesFace(blocks[1]);    
+    #[fFaces3, namesFaces] = featuresFace.getFeaturesFace(blocks[2]);    
+    #[fFaces4, namesFaces] = featuresFace.getFeaturesFace(blocks[3]);        
     [fLBP1, namesLBP] = featuresLBP2.getLBP(blocks[0]);            
     [fLBP2, namesLBP] = featuresLBP2.getLBP(blocks[1]);            
-    [fLBP3, namesLBP] = featuresLBP2.getLBP(blocks[2]);            
-    [fLBP4, namesLBP] = featuresLBP2.getLBP(blocks[3]);                
+    #[fLBP3, namesLBP] = featuresLBP2.getLBP(blocks[2]);            
+    #[fLBP4, namesLBP] = featuresLBP2.getLBP(blocks[3]);                
     [fColor1, namesColor] = featuresColor.getRGBS(blocks[0], PLOT);    
     [fColor2, namesColor] = featuresColor.getRGBS(blocks[1], PLOT);    
-    [fColor3, namesColor] = featuresColor.getRGBS(blocks[2], PLOT);    
-    [fColor4, namesColor] = featuresColor.getRGBS(blocks[3], PLOT);        
+    #[fColor3, namesColor] = featuresColor.getRGBS(blocks[2], PLOT);    
+    #[fColor4, namesColor] = featuresColor.getRGBS(blocks[3], PLOT);        
     [fHOG1, namesHOG] = featuresHOG.getHOG(blocks[0]);            
     [fHOG2, namesHOG] = featuresHOG.getHOG(blocks[1]);            
-    [fHOG3, namesHOG] = featuresHOG.getHOG(blocks[2]);            
-    [fHOG4, namesHOG] = featuresHOG.getHOG(blocks[3]);      
-    [fDOF1, namesDOF] = featuresDOF.getDepthOfFieldFeature2(blocks[0]);
-    [fDOF2, namesDOF] = featuresDOF.getDepthOfFieldFeature2(blocks[1]);
-    [fDOF3, namesDOF] = featuresDOF.getDepthOfFieldFeature2(blocks[2]);
-    [fDOF4, namesDOF] = featuresDOF.getDepthOfFieldFeature2(blocks[3]);    
+    #[fHOG3, namesHOG] = featuresHOG.getHOG(blocks[2]);            
+    #[fHOG4, namesHOG] = featuresHOG.getHOG(blocks[3]);      
+    #[fDOF1, namesDOF] = featuresDOF.getDepthOfFieldFeature2(blocks[0]);
+    #[fDOF2, namesDOF] = featuresDOF.getDepthOfFieldFeature2(blocks[1]);
+    #[fDOF3, namesDOF] = featuresDOF.getDepthOfFieldFeature2(blocks[2]);
+    #[fDOF4, namesDOF] = featuresDOF.getDepthOfFieldFeature2(blocks[3]);    
     t6 = time.clock();    
 
     #print "Total time: {0:.2f}".format(t6-start)
 
     # WITH BLOCKING
-    fv = fLines1 + fLines2 +fLines3 +fLines4 + fFaces1 + fFaces2 + fFaces3 +fFaces4 + fLBP1 + fLBP2 + fLBP3 + fLBP4 + fColor1 + fColor2 + fColor3 + fColor4 + fHOG1 + fHOG2 + fHOG3 + fHOG4 + fDOF1 + fDOF2 + fDOF3 + fDOF4;             
-    fNames = namesLines + namesLines + namesLines + namesLines +  namesFaces +  namesFaces +  namesFaces +  namesFaces + namesLBP + namesLBP + namesLBP + namesLBP + namesColor + namesColor + namesColor + namesColor + namesHOG + namesHOG + namesHOG + namesHOG + namesDOF+ namesDOF+ namesDOF+ namesDOF    
-    #fv = fLines1 + fLines2 +fLines3 +fLines4 +  fLBP1 + fLBP2 + fLBP3 + fLBP4 + fColor1 + fColor2 + fColor3 + fColor4 + fHOG1 + fHOG2 + fHOG3 + fHOG4;             
-    #fNames = namesLines + namesLines + namesLines  + namesLBP + namesLBP + namesLBP + namesLBP + namesColor + namesColor + namesColor + namesColor + namesHOG + namesHOG + namesHOG + namesHOG    
+    #fv = fLines1 + fLines2 +fLines3 +fLines4 + fFaces1 + fFaces2 + fFaces3 +fFaces4 + fLBP1 + fLBP2 + fLBP3 + fLBP4 + fColor1 + fColor2 + fColor3 + fColor4 + fHOG1 + fHOG2 + fHOG3 + fHOG4 + fDOF1 + fDOF2 + fDOF3 + fDOF4;             
+    #fNames = namesLines + namesLines + namesLines + namesLines +  namesFaces +  namesFaces +  namesFaces +  namesFaces + namesLBP + namesLBP + namesLBP + namesLBP + namesColor + namesColor + namesColor + namesColor + namesHOG + namesHOG + namesHOG + namesHOG + namesDOF+ namesDOF+ namesDOF+ namesDOF    
+    #fv = fLines1 + fLines2 +fLines3 +fLines4 + fLBP1 + fLBP2 + fLBP3 + fLBP4 + fColor1 + fColor2 + fColor3 + fColor4 + fHOG1 + fHOG2 + fHOG3 + fHOG4
+    #fNames = namesLines + namesLines + namesLines + namesLines +  namesLBP + namesLBP + namesLBP + namesLBP + namesColor + namesColor + namesColor + namesColor + namesHOG + namesHOG + namesHOG + namesHOG
+    fv = fLines1 + fLines2 + fLBP1 + fLBP2 + fColor1 + fColor2  + fHOG1 + fHOG2
+    fNames = namesLines + namesLines  +  namesLBP + namesLBP + namesColor + namesColor + namesHOG + namesHOG 
 
     # WITHOUT BLOCKING
     #fv     = fLines + fFaces + fLBP + fColor + fHOG + fDOF;             
