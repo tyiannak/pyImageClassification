@@ -109,10 +109,10 @@ def randSplitFeatures(features, textSents, ClassNames, partTrain):
         randperm = numpy.random.permutation(range(numOfSamples))
         nTrainSamples = int(round(partTrain * numOfSamples));
         featuresTrain.append(f[randperm[1:nTrainSamples]])
-        featuresTest.append(f[randperm[nTrainSamples+1:-1]])
+        featuresTest.append(f[randperm[nTrainSamples+1::]])
         if len(textSents)>i:
             sentimentPTrain.append(textSents[i][randperm[1:nTrainSamples]])
-            sentimentPTest.append(textSents[i][randperm[nTrainSamples+1:-1]])
+            sentimentPTest.append(textSents[i][randperm[nTrainSamples+1::]])
         
     return (featuresTrain, featuresTest, sentimentPTrain, sentimentPTest)
 
